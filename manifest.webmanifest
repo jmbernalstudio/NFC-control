@@ -1,0 +1,15 @@
+{
+  "name": "NFC Control — Gestor privado",
+  "short_name": "NFC Control",
+  "description": "Inventario cifrado y local de tarjetas de acceso",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07121e",
+  "theme_color": "#071724",
+  "icons": [
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
+    {"src":"./touch-icon.png","sizes":"180x180","type":"image/png"}
+  ]
+}
