@@ -1,7 +1,7 @@
 {
   "name": "NFC Control — Gestor privado",
   "short_name": "NFC Control",
-  "description": "Inventario cifrado y local de tarjetas de acceso",
+  "description": "Historial cifrado de lecturas NFC e inventario local de tarjetas de acceso",
   "lang": "es",
   "start_url": "./",
   "scope": "./",

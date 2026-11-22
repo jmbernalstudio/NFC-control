@@ -1,43 +1,83 @@
-# NFC Control · Gestor privado de tarjetas de acceso
+# NFC Control
 
-**Web estática y gratuita, diseñada para iPhone.** Permite administrar un inventario de tarjetas de acceso sin publicar las fichas en ningún servidor.
+**Historial cifrado de lecturas NFC y gestor privado de tarjetas de acceso, pensado para iPhone.** Web estática (PWA), gratuita, sin servidores, sin cuentas y sin analíticas.
 
-## Funcionalidades
+> **Lo primero que debes saber:** en iPhone ningún navegador (ni Safari ni Chrome) puede usar el lector NFC, porque iOS no implementa Web NFC. Y una app propia con Core NFC no se puede instalar con un Apple ID gratuito. Por eso NFC Control funciona así: **la lectura física la hace una app gratuita que sí tiene permiso NFC** (NFC Tools o NFC TagInfo by NXP) y **NFC Control importa, analiza, guarda cifrado y verifica** esa lectura. En Chrome para Android, la misma web lee y escribe NDEF directamente.
+>
+> El análisis completo está en [docs/ANALISIS.md](docs/ANALISIS.md).
 
-- Crear una bóveda cifrada con contraseña (AES-GCM 256 bits, clave derivada con PBKDF2-SHA256).
-- Añadir, editar y borrar fichas: nombre, titular, referencia/UID introducida manualmente, tecnología, instalación/zona, estado y notas.
-- Búsqueda, filtro de estado y estadísticas.
-- Exportar e importar copias de seguridad cifradas en JSON.
-- PWA opcional: añadir a pantalla de inicio y caché offline de los archivos estáticos tras la primera visita.
-- Sin dependencias, sin trackers, sin CDN, sin analítica y sin llamadas de red voluntarias desde JavaScript.
-- Auto-bloqueo tras 5 minutos de inactividad o al enviar la página a segundo plano.
+## Funciones
 
-## Qué NO puede hacer
+- **Escanear**: botón «Escanear NFC», estado real del lector del navegador e instrucciones. En iPhone abre la importación del informe; con Web NFC (Android) lee la tarjeta directamente.
+- **Resultado de lectura**: tecnología, chip, fabricante, UID, estándar, tipo NFC Forum, contenido NDEF, memoria en hexadecimal, datos técnicos e informe original.
+- **Operaciones disponibles**: para cada tarjeta indica qué se puede hacer (leer UID, leer y escribir NDEF, volcado de memoria, zonas cifradas) según su tecnología y su estado de bloqueo.
+- **Editor NDEF**: registros de texto y enlace, con validación y estimación de tamaño. En Android escribe en la tarjeta (comprobando antes que es la misma por su UID) y la vuelve a leer para verificar. En iPhone copia los registros para escribirlos con NFC Tools y verifica el cambio cuando importas la nueva lectura.
+- **Historial**: lecturas guardadas, búsqueda, comparación automática con lecturas anteriores de la misma tarjeta y creación de fichas desde una lectura.
+- **Tarjetas**: inventario de fichas (nombre, titular, UID, tecnología, zona, estado, notas).
+- **Ajustes**: copias de seguridad cifradas, protección del almacenamiento, bloqueo al salir, borrado del historial, diagnóstico del dispositivo y tabla de compatibilidad.
 
-- **Safari del iPhone NO admite Web NFC. Esta web no puede escanear, modificar, duplicar ni emular tarjetas NFC.**
-- Cambiar el estado de una ficha **NO activa ni revoca** la autorización real en una puerta.
-- No conecta con la electrónica de las cerraduras. Para abrir puertas de verdad hace falta una integración con un sistema autorizado compatible.
-- No puede garantizar invisibilidad absoluta frente a Apple, GitHub o el proveedor de internet. El hosting puede registrar visitas; iOS controla el navegador.
-- No se pueden recuperar contraseñas perdidas. El navegador puede eliminar su almacenamiento; crea y conserva copias cifradas.
+## Qué NO hace (a propósito)
 
-## Publicación gratuita en GitHub Pages
+- No lee NFC desde el navegador del iPhone (iOS no lo permite).
+- No descifra ni prueba claves de MIFARE Classic, DESFire, Plus o FeliCa, ni accede a sectores protegidos.
+- No clona ni emula tarjetas de acceso o de transporte.
+- No activa ni revoca accesos en cerraduras: el estado de una ficha es solo administrativo.
 
-1. En https://github.com/new crea un repositorio **público** llamado `nfc-control` (GitHub Pages gratuito requiere repositorio público).
-2. Sube **los archivos de esta carpeta al nivel raíz del repositorio** (`index.html`, `app.js`, `styles.css`, `sw.js`, etc.), sin subir esta carpeta como subcarpeta.
-3. En el repositorio abre **Settings > Pages**. En **Build and deployment** selecciona **Deploy from a branch**, `main` y `/ (root)`; guarda.
-4. Visita `https://TU-USUARIO.github.io/nfc-control/` desde Safari.
-5. Opcional: Safari > Compartir > **Añadir a pantalla de inicio** para abrirla con icono. Entra al sitio una vez con internet antes de desconectarte.
+La mayoría de llaves de hotel, gimnasio y edificio son MIFARE Classic o DESFire: con un iPhone verás su tecnología y su UID, pero su contenido está cifrado con claves del emisor. Las etiquetas que sí puedes leer y reescribir por completo son, por ejemplo, NTAG213/215/216.
 
-## Privacidad
+## Uso desde el iPhone
 
-El repositorio de GitHub Pages será **público**: solo contiene el código y estilos. **Nunca subas tus fichas, contraseñas ni copias JSON a GitHub.**
+### 1. Instalar las apps lectoras (gratis, una vez)
+- [NFC Tools](https://apps.apple.com/app/id1252962749) (wakdev): leer, escribir NDEF y exportar volcados de memoria.
+- [NFC TagInfo by NXP](https://apps.apple.com/app/id1246143596): identificación detallada de chips NXP (NTAG, MIFARE, ICODE) y comprobación de originalidad.
+- Opcional: [NFC TagWriter by NXP](https://apps.apple.com/app/id1246143221) para escribir NDEF.
 
-Las fichas se cifran en el navegador antes de almacenarse en `localStorage` de ese origen. Los datos no se incluyen en la URL ni se transfieren por el JavaScript de la web. GitHub sí sirve los archivos y puede registrar peticiones de red e IP; Apple/iOS tampoco es invisible desde un iPhone. El almacenamiento web puede estar sujeto a políticas de eliminación, copias del dispositivo y comportamiento de Safari. Guarda respaldos cifrados y no registres secretos de cerraduras ni claves maestras en las notas.
+Las tres declaran «Datos no recopilados» en la App Store.
 
-## Uso local en Mac
+### 2. Abrir NFC Control
+Abre `https://jmbernalstudio.github.io/NFC-control/` en Safari (o Chrome), crea tu contraseña de cifrado (mínimo 10 caracteres) y, si quieres, Compartir → **Añadir a pantalla de inicio**.
 
-`python3 -m http.server 8000` dentro de esta carpeta y abre `http://localhost:8000/` en el Mac. Para utilizar Web Crypto en el iPhone es mejor publicarlo bajo HTTPS con GitHub Pages.
+### 3. Leer una tarjeta
+1. Abre NFC Tools → **Leer** (o TagInfo → **Scan**) y acerca la tarjeta a la parte superior trasera del iPhone.
+2. Copia el informe:
+   - **TagInfo**: activa *Full Scan* en ajustes, pestaña *Full Scan* → botón Compartir → *Guardar en Archivos* (o Copiar).
+   - **NFC Tools**: mantén pulsados los datos para copiarlos, o exporta el volcado de memoria (`.txt`, `.hex`, `.bin`, `.nfc`).
+3. Vuelve a NFC Control → **Escanear NFC** → pega el texto o pulsa *Elegir archivo…* → **Analizar y guardar**.
 
-## Tecnología
+Si sales de la web menos de 2 minutos para copiar el informe, la bóveda sigue desbloqueada. Puedes cambiarlo a bloqueo inmediato en Ajustes.
 
-HTML, CSS, JavaScript, Web Crypto API, Service Worker. Sin compilación, servidor de datos ni paquetes npm.
+### 4. Editar y escribir (solo tarjetas que lo admiten)
+1. En el resultado pulsa **Editar NDEF**, modifica los registros y pulsa **Copiar registros**.
+2. En NFC Tools → **Escribir** → *Añadir un registro* (Texto o URL) → pega → **Escribir** y acerca la tarjeta.
+3. Vuelve a leer la tarjeta e impórtala: NFC Control mostrará **«✓ Escritura verificada»** si coincide con lo que editaste.
+
+## Publicar en GitHub Pages
+
+El repositorio ya tiene Pages activado. Tras fusionar los cambios en `main`:
+1. Ve a **Settings → Pages** y comprueba *Deploy from a branch*, rama `main`, carpeta `/ (root)`.
+2. Espera 1-2 minutos y abre `https://jmbernalstudio.github.io/NFC-control/`.
+3. Si ya tenías la web instalada, ciérrala y ábrela dos veces para que el Service Worker cargue la versión nueva.
+
+**Nunca subas a GitHub tus copias de seguridad ni informes de lectura**: el repositorio es público.
+
+## Privacidad y seguridad
+
+- Cifrado AES-GCM de 256 bits; clave derivada de tu contraseña con PBKDF2-SHA256 (240 000 iteraciones). Las tarjetas y lecturas solo se guardan cifradas en el almacenamiento local del navegador.
+- Política de seguridad de contenidos con `connect-src 'none'`: la web no puede enviar datos a ningún servidor.
+- Sin dependencias externas, sin CDN, sin trackers.
+- Bloqueo automático tras 5 minutos de inactividad.
+- No se puede recuperar la contraseña. Exporta copias cifradas desde Ajustes; Safari puede borrar los datos de webs que no visitas en semanas (usa «Proteger almacenamiento» y añade la web a la pantalla de inicio para reducir ese riesgo).
+- GitHub Pages sirve los archivos y puede registrar tu IP al cargar la página. Apple ve la descarga de las apps lectoras desde la App Store.
+
+## Desarrollo local
+
+```bash
+python3 -m http.server 8000
+# abre http://localhost:8000/
+```
+
+Archivos: `index.html` (interfaz), `app.js` (bóveda, historial, editor, Web NFC), `nfc-parse.js` (análisis de informes y base de compatibilidad), `styles.css`, `sw.js` (funcionamiento sin conexión), `manifest.webmanifest`.
+
+## Ampliación futura: app nativa
+
+Si algún día decides pagar el Apple Developer Program (99 €/año) y tienes un Mac, una app SwiftUI con Core NFC podría leer directamente (UID, GET_VERSION, páginas de NTAG/Ultralight, versión de DESFire, bloques ISO 15693, IDm de FeliCa) y escribir NDEF sin pasar por otras apps, con los mismos límites de seguridad descritos arriba.

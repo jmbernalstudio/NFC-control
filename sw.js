@@ -1,5 +1,5 @@
-const CACHE = 'nfc-control-static-v1';
-const ASSETS = ['./','./index.html','./styles.css','./app.js','./manifest.webmanifest','./icon.svg','./touch-icon.png'];
+const CACHE = 'nfc-control-static-v2';
+const ASSETS = ['./','./index.html','./styles.css','./app.js','./nfc-parse.js','./manifest.webmanifest','./icon.svg','./touch-icon.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
